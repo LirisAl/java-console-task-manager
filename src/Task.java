@@ -1,7 +1,7 @@
 public class Task {
-    private int id;
-    private String title;
-    private String priority; // LOW, MED, HIGH
+    private final int id;
+    private final String title;
+    private final String priority; // LOW, MED, HIGH
     private String status;   // TODO, DONE
 
     public Task(int id, String title, String priority) {
@@ -15,10 +15,21 @@ public class Task {
     }
 
     // Геттеры
-    public int getId() { return id; }
-    public String getTitle() { return title; }
-    public String getPriority() { return priority; }
-    public String getStatus() { return status; }
+    public int getId() {
+        return id;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public String getPriority() {
+        return priority;
+    }
+
+    public String getStatus() {
+        return status;
+    }
 
     // Метод для изменения статуса
     public void markAsDone() {
