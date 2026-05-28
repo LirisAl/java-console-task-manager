@@ -37,24 +37,38 @@ public class Main {
     }
 
     private static void addTaskFlow(Scanner scanner, TaskManager manager) {
-        System.out.print("Введите название задачи: ");
-        String title = scanner.nextLine().trim();
+        System.out.println("=== Добавление задачи ===\n");
 
-        if (title.isEmpty()) {
-            System.out.println("❌ Название задачи не может быть пустым!\n");
-            return;
+        // Ввод названия (просто проверка на пустоту)
+        String title = readWithRetry(scanner,
+                "Введите название задачи (или \"cancel/c\" для отмены): ",
+                "➕ Добавление задачи отменено.",
+                "❌ Название не может быть пустым!");
+
+        if (title == null) return;  // Если отмена → выход
+
+        // Ввод приоритета (проверка по списку LOW/MED/HIGH)
+        String priorityNumber = readWithRetry(scanner,
+                "Введите приоритет: \n1. LOW\n2. MED\n3. HIGH\n0. cancel\n",
+                "➕ Добавление задачи отменено.",
+                "❌ Неверный приоритет! Используйте LOW, MED или HIGH.",
+                "0", "1", "2", "3");  // ← Вот список допустимых!
+
+        if (priorityNumber == null) return;  // Если отмена → выход
+
+// КОНВЕРТАЦИЯ номера в текст
+        String priority;
+        switch (priorityNumber) {
+            case "1" -> priority = "LOW";
+            case "2" -> priority = "MED";
+            case "3" -> priority = "HIGH";
+            default -> {
+                System.out.println("❌ Ошибка конвертации!");
+                return;
+            }
         }
-
-        System.out.print("Введите приоритет (LOW/MED/HIGH): ");
-        String priority = scanner.nextLine().trim().toUpperCase();
-
-        if (!priority.equals("LOW") && !priority.equals("MED") && !priority.equals("HIGH")) {
-            System.out.println("❌ Неверный приоритет! Используйте LOW, MED или HIGH.\n");
-            return;
-        }
-
         manager.addTask(title, priority);
-        System.out.println();
+        System.out.println("✅ Задача добавлена!\n");
     }
 
     private static void markDoneFlow(Scanner scanner, TaskManager manager) {
@@ -77,5 +91,46 @@ public class Main {
             System.out.println("❌ Введите корректный номер (число)!\n");
         }
         System.out.println();
+    }
+    private static String readWithRetry(Scanner scanner, String prompt,
+                                        String cancelMessage,
+                                        String errorMessage,
+                                        String... validValues) {
+
+        while (true) {
+            System.out.print(prompt);
+            String input = scanner.nextLine().trim();
+
+            // Проверяем на отмену (латинская c, Cyrillic с, cancel, C, С)
+            if (input.equalsIgnoreCase("cancel") ||
+                    input.equalsIgnoreCase("c") ||
+                    input.equals("с") ||  // Кириллическая маленькая с
+                    input.equals("С")) {  // Кириллическая заглавная С
+                System.out.println(cancelMessage);
+                return null;
+            }
+
+            // Если есть список допустимых значений
+            if (validValues.length > 0) {
+                String upperInput = input.toUpperCase();
+
+                // Проходим по всем допустимым значениям
+                for (String valid : validValues) {
+                    if (valid.equals(upperInput)) {
+                        return upperInput;  // Нашли!
+                    }
+                }
+
+                // Не нашли в списке → ошибка
+                System.out.println(errorMessage);
+
+            } else {
+                // Списка нет → просто проверяем на пустоту
+                if (!input.isEmpty()) {
+                    return input;
+                }
+                System.out.println(errorMessage);
+            }
+        }
     }
 }
